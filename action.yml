@@ -1,0 +1,49 @@
+name: PHP Infection
+description: Run PHP Mutation Testing with Infection in your Github Actions.
+
+inputs:
+  phpunit_version:
+    description: What version of PHPUnit to use
+    default: latest
+    required: false
+
+  php_version:
+    description: What version of PHP to use
+    default: latest
+    required: false
+
+  php_extensions:
+    description: Space separated list of extensions to configure with the PHP build (xdebug is required)
+    default: xdebug
+    required: false
+
+  configuration:
+    description: Configuration file location
+    required: false
+
+  test_framework_options:
+    description: Extra arguments to pass to the test framework
+    required: false
+
+  args:
+    description: Extra arguments to pass to the infection binary
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - env:
+        ACTION_TOKEN: ${{ github.token }}
+        ACTION_PHPUNIT_VERSION: ${{ inputs.phpunit_version }}
+        ACTION_PHP_VERSION: ${{ inputs.php_version }}
+        ACTION_PHP_EXTENSIONS: ${{ inputs.php_extensions }}
+        ACTION_CONFIGURATION: ${{ inputs.configuration }}
+        ACTION_TEST_FRAMEWORK_OPTIONS: ${{ inputs.test_framework_options }}
+        ACTION_ARGS: ${{ inputs.args }}
+      id: infection_run
+      run: ${{ github.action_path }}/php-build.bash infection && ${{ github.action_path }}/infection-action.bash || { echo "::group::Debug output" ; cat ${{ github.workspace }}/output.log ; echo "::endgroup::" ; exit 1; }
+      shell: bash
+
+branding:
+  icon: 'check-square'
+  color: 'purple'
